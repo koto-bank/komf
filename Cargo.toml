@@ -12,7 +12,7 @@ maud = {version = "*", features = [ "iron" ] }
 maud_macros = "*"
 
 multipart = { version = "*", features = [ "iron" ] }
-rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TyanNN/rustbreak" }
+rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TheNeikos/rustbreak" }
 sha1 = "*"
 lazy_static = "*"
 chrono = { version = "*", features = [ "serde" ] }
