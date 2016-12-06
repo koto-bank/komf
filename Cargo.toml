@@ -1,0 +1,18 @@
+[package]
+name = "komf"
+version = "0.1.0"
+authors = ["TyanNN <tyannn@cocaine.ninja>"]
+
+[dependencies]
+iron = "*"
+staticfile = "*"
+mount = "*"
+
+maud = {version = "*", features = [ "iron" ] }
+maud_macros = "*"
+
+multipart = { version = "*", features = [ "iron" ] }
+rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TyanNN/rustbreak" }
+sha1 = "*"
+lazy_static = "*"
+chrono = { version = "*", features = [ "serde" ] }

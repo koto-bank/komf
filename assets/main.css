@@ -1,0 +1,50 @@
+body {
+    background-color: #F0F8FF;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 60%;
+}
+
+.maincenter {
+    margin: 20%;
+    text-align: center;
+    color: black;
+}
+
+.button {
+    background: #fff0f5;
+    border: 1px solid #ffb6c1;
+    border-radius: 30px;
+    cursor: pointer;
+    padding: 25px;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #f08080;
+    font-size: 30px;
+}
+
+#file-input {
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 25px;
+    font-size: 30px;
+    cursor: pointer;
+    opacity: 0;
+}
+
+#logo {
+    font-family: Helvetica Neue;
+    font-size: 45px;
+    color: #333;
+}
+
+#upload {
+    padding: 10px;
+    position: relative;
+    overflow: hidden;
+}
