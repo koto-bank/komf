@@ -65,7 +65,7 @@ fn upload(req: &mut Request) -> IronResult<Response> {
     if let Ok(mut multipart) = Multipart::from_request(req) {
         match multipart.save_all() {
             SaveResult::Full(entries) | SaveResult::Partial(entries, _)  => {
-                if let (Some(savedfile),Some(date)) = (entries.files.get("file"),entries.fields.get("date")) {
+                if let Some(savedfile) = entries.files.get("file") {
                     let ext = savedfile.filename.clone().unwrap();
                     let ext = ext.split('.').last().unwrap();
 
@@ -79,6 +79,8 @@ fn upload(req: &mut Request) -> IronResult<Response> {
                         copy(&savedfile.path, format!("{}/{}.{}", FILE_DIR, name, ext)).unwrap();
                     }
 
+                    let d = "day".to_owned();
+                    let date = entries.fields.get("date").unwrap_or(&d);
                     let date = match date.as_str() {
                         "week" => Local::now() + Duration::weeks(1),
                         "month" => Local::now() + Duration::weeks(4),
