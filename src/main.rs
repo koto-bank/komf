@@ -31,7 +31,8 @@ use chrono::{Local,Duration,DateTime};
 
 
 static FILE_DIR : &'static str = "files";
-static MAX_SIZE : u64 = 512 * 1024 * 1024; //512 MB
+const MAX_MB : u64 = 512;
+static MAX_SIZE : u64 = MAX_MB * 1024 * 1024; //512 MB
 
 lazy_static!{
     static ref DB : Database<String> = Database::open("db.yaml").unwrap();
@@ -56,6 +57,7 @@ fn index(_: &mut Request) -> IronResult<Response> {
                         option value="month" "Month"
                     }
                 }
+                {"File size limit is " (MAX_MB) "MB"}
             }
         }
 

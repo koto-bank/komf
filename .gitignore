@@ -1,3 +1,4 @@
 target
 files
 db.yaml
+Cargo.lock
