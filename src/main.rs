@@ -21,6 +21,7 @@ use iron::prelude::*;
 use iron::status;
 use staticfile::Static;
 use mount::Mount;
+use iron::headers::ContentLength;
 
 use multipart::server::{Multipart,SaveResult};
 use sha1::Sha1;
@@ -30,6 +31,7 @@ use chrono::{Local,Duration,DateTime};
 
 
 static FILE_DIR : &'static str = "files";
+static MAX_SIZE : u64 = 512 * 1024 * 1024; //512 MB
 
 lazy_static!{
     static ref DB : Database<String> = Database::open("db.yaml").unwrap();
@@ -62,6 +64,13 @@ fn index(_: &mut Request) -> IronResult<Response> {
 }
 
 fn upload(req: &mut Request) -> IronResult<Response> {
+    let headers = req.headers.clone();
+    let size = headers.get::<ContentLength>().unwrap().0;
+
+    if size > MAX_SIZE {
+        return Ok(Response::with((status::Ok,"File is too large"))) // This actually just drops the connection
+    }
+
     if let Ok(mut multipart) = Multipart::from_request(req) {
         match multipart.save_all() {
             SaveResult::Full(entries) | SaveResult::Partial(entries, _)  => {
