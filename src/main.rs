@@ -67,7 +67,11 @@ fn index(_: &mut Request) -> IronResult<Response> {
 
 fn upload(req: &mut Request) -> IronResult<Response> {
     let headers = req.headers.clone();
-    let size = headers.get::<ContentLength>().unwrap().0;
+
+    let size = match headers.get::<ContentLength>() { // In case somebody tries to send request w/o Content-Length
+        Some(s) => s.0,
+        None    => return Ok(Response::with((status::LengthRequired, "Length required!!1")))
+    };
 
     if size > MAX_SIZE {
         return Ok(Response::with((status::Ok,"File is too large"))) // This actually just drops the connection
