@@ -74,7 +74,7 @@ fn upload(req: &mut Request) -> IronResult<Response> {
     };
 
     if size > MAX_SIZE {
-        return Ok(Response::with((status::Ok,"File is too large"))) // This actually just drops the connection
+        return Ok(Response::with((status::PayloadTooLarge,"File is too large"))) // This actually just drops the connection
     }
 
     if let Ok(mut multipart) = Multipart::from_request(req) {
