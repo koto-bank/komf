@@ -8,11 +8,15 @@ iron = "*"
 staticfile = "*"
 mount = "*"
 
+serde = "0.8.12"
+serde_derive = "*"
+
 maud = {version = "*", features = [ "iron" ] }
 maud_macros = "*"
 
 multipart = { version = "*", features = [ "iron" ] }
 rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TheNeikos/rustbreak" }
 sha1 = "*"
+rand = "*"
 lazy_static = "*"
 chrono = { version = "*", features = [ "serde" ] }

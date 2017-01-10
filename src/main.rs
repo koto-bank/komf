@@ -1,4 +1,4 @@
-#![feature(plugin)]
+#![feature(plugin,proc_macro)]
 #![plugin(maud_macros)]
 
 extern crate iron;
@@ -10,7 +10,9 @@ extern crate maud;
 extern crate multipart;
 extern crate sha1;
 extern crate chrono;
+extern crate rand;
 #[macro_use] extern crate lazy_static;
+#[macro_use] extern crate serde_derive;
 
 use std::path::Path;
 use std::fs::{File,copy,metadata,read_dir,remove_file};
@@ -29,10 +31,19 @@ use rustbreak::Database;
 
 use chrono::{Local,Duration,DateTime};
 
+use rand::{OsRng,Rng};
 
 static FILE_DIR : &'static str = "files";
+static LINK_CHARS: usize = 6;
 const MAX_MB : u64 = 512;
 static MAX_SIZE : u64 = MAX_MB * 1024 * 1024; //512 MB
+
+#[derive(Serialize,Deserialize)]
+struct Fl {
+    name: String,
+    sha1: String,
+    time: DateTime<Local>
+}
 
 lazy_static!{
     static ref DB : Database<String> = Database::open("db.yaml").unwrap();
@@ -86,12 +97,25 @@ fn upload(req: &mut Request) -> IronResult<Response> {
 
                     let mut body = Vec::new();
                     let _ = File::open(&savedfile.path).unwrap().read_to_end(&mut body);
+                    
                     let mut sha = Sha1::new();
                     sha.update(&body);
-                    let name = sha.digest().to_string();
+                    let sha = sha.digest().to_string();
 
-                    if let Err(_) = metadata(format!("{}/{}.{}", FILE_DIR, name, ext)) {
-                        copy(&savedfile.path, format!("{}/{}.{}", FILE_DIR, name, ext)).unwrap();
+                    fn gen_name(ext: &str) -> String {
+                        let name = OsRng::new().unwrap().gen_ascii_chars().take(LINK_CHARS).collect::<String>();
+                        let name = format!("{}.{}", name, ext);
+                        if DB.retrieve::<Fl,_>(&name).is_err() {
+                            name.to_string()
+                        } else {
+                            gen_name(ext)
+                        }
+                    }
+                    
+                    let name = gen_name(ext);
+
+                    if let Err(_) = metadata(format!("{}/{}", FILE_DIR, name)) {
+                        copy(&savedfile.path, format!("{}/{}", FILE_DIR, name)).unwrap();
                     }
 
                     let d = "day".to_owned();
@@ -102,10 +126,16 @@ fn upload(req: &mut Request) -> IronResult<Response> {
                         "day" | _ => Local::now() + Duration::days(1)
                     };
 
-                    DB.insert(&format!("{}.{}",name, ext),date).unwrap();
+                    let f = Fl{
+                        name: name.clone(),
+                        sha1: sha,
+                        time: date
+                    };
+
+                    DB.insert(&f.name.clone(), f).unwrap();
                     DB.flush().unwrap();
 
-                    Ok(Response::with((status::Ok, format!("/file/{}.{}", name, ext))))
+                    Ok(Response::with((status::Ok, format!("/file/{}", name))))
                 } else { Ok(Response::with((status::BadRequest,"Can't load file/time"))) }
             },
 
@@ -122,8 +152,8 @@ fn clean() {
         let file_path = f.unwrap();
         let file = file_path.file_name();
         let file = file.to_str().unwrap();
-        if let Ok(date) = DB.retrieve::<DateTime<Local>,_>(file) {
-            if Local::now() >= date {
+        if let Ok(date) = DB.retrieve::<Fl,_>(file) {
+            if Local::now() >= date.time {
                 remove_file(file_path.path()).unwrap();
                 DB.delete(file).unwrap();
                 DB.flush().unwrap();
