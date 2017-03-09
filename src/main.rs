@@ -67,6 +67,9 @@ fn index(_: &mut Request) -> IronResult<Response> {
                         option value="week" "Week"
                         option value="month" "Month"
                     }
+                    br
+                    input#submit-button type="submit" /
+                    script "document.getElementById('submit-button').style.display = 'none'"
                 }
                 {"File size limit is " (MAX_MB) "MB"}
             }
