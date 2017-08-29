@@ -36,6 +36,7 @@ use rand::{OsRng,Rng};
 static FILE_DIR : &'static str = "files";
 static LINK_CHARS: usize = 6;
 const MAX_MB : u64 = 512;
+static DOMAIN : &'static str = "domain.tld";
 static MAX_SIZE : u64 = MAX_MB * 1024 * 1024; //512 MB
 
 #[derive(Serialize,Deserialize)]
@@ -142,7 +143,9 @@ fn upload(req: &mut Request) -> IronResult<Response> {
             DB.insert(&f.name.clone(), f).unwrap();
             DB.flush().unwrap();
 
-            Ok(Response::with((status::Ok, format!("/file/{}.{}", name, ext))))
+            let message = format!("https://{}/file/{}", DOMAIN, name);
+            Ok(Response::with((status::Ok,
+                               html!{a href=(message) (message) })))
         } else { Ok(Response::with((status::BadRequest,"Can't load file/time"))) }
     } else {
         Ok(Response::with((status::BadRequest,"Not a multipart request?")))
