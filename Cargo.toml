@@ -11,8 +11,8 @@ mount = "*"
 serde = "0.8.12"
 serde_derive = "*"
 
-maud = {version = "*", features = [ "iron" ] }
-maud_macros = "*"
+maud = { git = "https://github.com/lfairy/maud", features = ["iron"] }
+maud_macros = { git = "https://github.com/lfairy/maud" }
 
 multipart = { version = "*", features = [ "iron" ] }
 rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TheNeikos/rustbreak" }

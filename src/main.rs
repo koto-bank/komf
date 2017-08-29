@@ -1,5 +1,4 @@
 #![feature(plugin,proc_macro)]
-#![plugin(maud_macros)]
 
 extern crate iron;
 extern crate staticfile;
@@ -22,6 +21,7 @@ use std::str;
 use iron::prelude::*;
 use iron::status;
 use staticfile::Static;
+use maud::html;
 use mount::Mount;
 use iron::headers::ContentLength;
 
@@ -100,7 +100,7 @@ fn upload(req: &mut Request) -> IronResult<Response> {
 
                     let mut body = Vec::new();
                     let _ = File::open(&savedfile.path).unwrap().read_to_end(&mut body);
-                    
+
                     let mut sha = Sha1::new();
                     sha.update(&body);
                     let sha = sha.digest().to_string();
@@ -114,7 +114,7 @@ fn upload(req: &mut Request) -> IronResult<Response> {
                             gen_name(ext)
                         }
                     }
-                    
+
                     let name = gen_name(ext);
 
                     if let Err(_) = metadata(format!("{}/{}", FILE_DIR, name)) {
