@@ -8,7 +8,7 @@ iron = "*"
 staticfile = "*"
 mount = "*"
 
-serde = "0.8.12"
+serde = "*"
 serde_derive = "*"
 
 maud = { git = "https://github.com/lfairy/maud", features = ["iron"] }
