@@ -92,58 +92,58 @@ fn upload(req: &mut Request) -> IronResult<Response> {
     }
 
     if let Ok(mut multipart) = Multipart::from_request(req) {
-        match multipart.save_all() {
-            SaveResult::Full(entries) | SaveResult::Partial(entries, _)  => {
-                if let Some(savedfile) = entries.files.get("file") {
-                    let ext = savedfile.filename.clone().unwrap();
-                    let ext = ext.split('.').last().unwrap();
+        let entries = match multipart.save().temp() {
+            SaveResult::Full(e) => e,
+            SaveResult::Partial(partial, _) => partial.entries,
+            SaveResult::Error(e) => return Ok(Response::with((status::BadRequest,format!("Couldn't handle POST! {:?}", e))))
+	};
+        if let Some(savedfiles) = entries.files.get("file") {
+            let savedfile = &savedfiles[0];
+            let ext = savedfile.filename.clone().unwrap();
+            let ext = ext.split('.').last().unwrap();
 
-                    let mut body = Vec::new();
-                    let _ = File::open(&savedfile.path).unwrap().read_to_end(&mut body);
+            let mut body = Vec::new();
+            let _ = File::open(&savedfile.path).unwrap().read_to_end(&mut body);
 
-                    let mut sha = Sha1::new();
-                    sha.update(&body);
-                    let sha = sha.digest().to_string();
+            let mut sha = Sha1::new();
+            sha.update(&body);
+            let sha = sha.digest().to_string();
 
-                    fn gen_name(ext: &str) -> String {
-                        let name = OsRng::new().unwrap().gen_ascii_chars().take(LINK_CHARS).collect::<String>();
-                        let name = format!("{}.{}", name, ext);
-                        if DB.retrieve::<Fl,_>(&name).is_err() {
-                            name.to_string()
-                        } else {
-                            gen_name(ext)
-                        }
-                    }
+            fn gen_name(ext: &str) -> String {
+                let name = OsRng::new().unwrap().gen_ascii_chars().take(LINK_CHARS).collect::<String>();
+                let name = format!("{}.{}", name, ext);
+                if DB.retrieve::<Fl,_>(&name).is_err() {
+                    name.to_string()
+                } else {
+                    gen_name(ext)
+                }
+            }
 
-                    let name = gen_name(ext);
+            let name = gen_name(ext);
 
-                    if let Err(_) = metadata(format!("{}/{}", FILE_DIR, name)) {
-                        copy(&savedfile.path, format!("{}/{}", FILE_DIR, name)).unwrap();
-                    }
+            if let Err(_) = metadata(format!("{}/{}", FILE_DIR, name)) {
+                copy(&savedfile.path, format!("{}/{}", FILE_DIR, name)).unwrap();
+            }
 
-                    let d = "day".to_owned();
-                    let date = entries.fields.get("date").unwrap_or(&d);
-                    let date = match date.as_str() {
-                        "week" => Local::now() + Duration::weeks(1),
-                        "month" => Local::now() + Duration::weeks(4),
-                        "day" | _ => Local::now() + Duration::days(1)
-                    };
+            let d = "day".to_owned();
+            let date = entries.fields.get("date").unwrap_or(&d);
+            let date = match date.as_str() {
+                "week" => Local::now() + Duration::weeks(1),
+                "month" => Local::now() + Duration::weeks(4),
+                "day" | _ => Local::now() + Duration::days(1)
+            };
 
-                    let f = Fl{
-                        name: name.clone(),
-                        sha1: sha,
-                        time: date
-                    };
+            let f = Fl{
+                name: name.clone(),
+                sha1: sha,
+                time: date
+            };
 
-                    DB.insert(&f.name.clone(), f).unwrap();
-                    DB.flush().unwrap();
+            DB.insert(&f.name.clone(), f).unwrap();
+            DB.flush().unwrap();
 
-                    Ok(Response::with((status::Ok, format!("/file/{}", name))))
-                } else { Ok(Response::with((status::BadRequest,"Can't load file/time"))) }
-            },
-
-            SaveResult::Error(e) =>  Ok(Response::with((status::BadRequest,format!("Couldn't handle POST! {:?}", e))))
-        }
+            Ok(Response::with((status::Ok, format!("/file/{}.{}", name, ext))))
+        } else { Ok(Response::with((status::BadRequest,"Can't load file/time"))) }
     } else {
         Ok(Response::with((status::BadRequest,"Not a multipart request?")))
     }
