@@ -14,9 +14,13 @@ serde_derive = "*"
 maud = { git = "https://github.com/lfairy/maud", features = ["iron"] }
 maud_macros = { git = "https://github.com/lfairy/maud" }
 
-multipart = { version = "*", features = [ "iron" ] }
-rustbreak = { version = "*", default-features = false, features = [ "yaml" ], git = "https://github.com/TheNeikos/rustbreak" }
+multipart = { version = "0.13.6", features = [ "iron" ] }
 sha1 = "*"
-rand = "*"
+rand = "0.4.5"
 lazy_static = "*"
 chrono = { version = "*", features = [ "serde" ] }
+
+[dependencies.rustbreak]
+version = "1.4.0"
+default-features = false
+features = ["yaml"]
