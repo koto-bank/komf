@@ -1,4 +1,4 @@
-#![feature(plugin,proc_macro)]
+#![feature(plugin,proc_macro_hygiene)]
 
 extern crate iron;
 extern crate staticfile;
@@ -56,21 +56,21 @@ fn index(_: &mut Request) -> IronResult<Response> {
 
         div.container {
             div.maincenter {
-                h1#logo "Komf"
+                h1#logo { "Komf" }
                 form#upload action="/upload" method="POST" enctype="multipart/form-data" {
                     div.button {
-                        span b "Select/Drop file here~"
+                        span { b { "Select/Drop file here~" } }
                         input#file-input onchange="this.form.submit()" type="file" name="file" /
                     }
                     br
-                    select name="date" {
-                        option selected="selected" value="day" "Day"
-                        option value="week" "Week"
-                        option value="month" "Month"
-                    }
+                    { select name="date" {
+                        option selected="selected" value="day" { "Day" }
+                        option value="week" { "Week" }
+                        option value="month" { "Month" }
+                    } }
                     br
-                    input#submit-button type="submit" /
-                    script "document.getElementById('submit-button').style.display = 'none'"
+                    { input#submit-button type="submit" / }
+                    script { "document.getElementById('submit-button').style.display = 'none'" }
                 }
                 {"File size limit is " (MAX_MB) "MB"}
             }
@@ -145,7 +145,7 @@ fn upload(req: &mut Request) -> IronResult<Response> {
 
             let message = format!("https://{}/file/{}", DOMAIN, name);
             Ok(Response::with((status::Ok,
-                               html!{a href=(message) (message) })))
+                               html!{a href=(message) { (message) } })))
         } else { Ok(Response::with((status::BadRequest,"Can't load file/time"))) }
     } else {
         Ok(Response::with((status::BadRequest,"Not a multipart request?")))
