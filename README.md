@@ -2,7 +2,7 @@
 
 Komf is a pomf-like file hosting!
 
-No external dependencies.
+No external dependencies. Requires rust nightly.
 
 # Usage
 
